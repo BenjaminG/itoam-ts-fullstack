@@ -1,0 +1,37 @@
+{
+  "name": "@itoam/database",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./schema": {
+      "development": "./src/schema.ts",
+      "types": "./src/schema.ts",
+      "import": "./dist/schema.js"
+    },
+    "./client": {
+      "development": "./src/client.ts",
+      "types": "./src/client.ts",
+      "import": "./dist/client.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc --build tsconfig.build.json",
+    "drizzle-kit": "drizzle-kit",
+    "lint": "eslint .",
+    "seed": "tsx scripts/seed.ts",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "drizzle-orm": "0.44.6",
+    "postgres": "3.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "22.18.12",
+    "drizzle-kit": "0.31.5",
+    "drizzle-seed": "0.3.1"
+  }
+}

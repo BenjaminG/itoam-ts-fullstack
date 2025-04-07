@@ -1,0 +1,67 @@
+name: Ci
+
+concurrency:
+  group: ${{ github.workflow }}.${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          run_install: false
+
+      - name: Expose pnpm config through "$GITHUB_OUTPUT"
+        id: pnpm-config
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: runs-on/cache@v4
+        with:
+          path: ${{ steps.pnpm-config.outputs.STORE_PATH }}
+          key: ${{ runner.arch }}-pnpm-store-cache-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.arch }}-pnpm-store-cache-
+
+      - name: Fetch dependencies
+        run: pnpm fetch
+        shell: bash
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --offline --ignore-scripts
+        shell: bash
+
+      - name: Run cspell
+        run: pnpm cspell lint --no-progress --gitignore --show-context **
+
+      - name: Run prettier
+        run: pnpm prettier --check .
+
+      - name: Run knip
+        run: pnpm knip
+
+      - name: Run lint
+        run: pnpm run --recursive lint
+
+      - name: Run type-check
+        run: pnpm run --recursive type-check
+
+      - name: Run build
+        run: pnpm run --recursive build

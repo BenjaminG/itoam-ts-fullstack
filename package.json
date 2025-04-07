@@ -1,0 +1,53 @@
+{
+  "name": "@itoam/ts-fullstack",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm run --recursive build",
+    "ci": "run-s spell-check format knip lint type-check build",
+    "clean": "./scripts/clean.sh",
+    "format": "prettier --write .",
+    "knip": "knip",
+    "lint": "pnpm run --recursive lint",
+    "spell-check": "cspell --show-context --no-progress '**'",
+    "start": "./scripts/start.sh",
+    "stop": "docker compose down --volumes",
+    "type-check": "pnpm run --recursive type-check"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.38.0",
+    "@itoam/typescript-config": "workspace:*",
+    "cspell": "9.2.2",
+    "eslint": "9.38.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-react": "7.37.5",
+    "eslint-plugin-react-hooks": "7.0.0",
+    "eslint-plugin-unused-imports": "4.3.0",
+    "globals": "16.4.0",
+    "knip": "5.66.2",
+    "npm-run-all": "4.1.5",
+    "prettier": "3.6.2",
+    "prettier-plugin-packagejson": "2.5.19",
+    "prettier-plugin-tailwindcss": "0.7.1",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.46.2"
+  },
+  "packageManager": "pnpm@10.19.0",
+  "engines": {
+    "node": "22.18.0",
+    "pnpm": ">=10"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "22.18.0",
+      "onFail": "download"
+    },
+    "packageManager": {
+      "name": "pnpm",
+      "version": "10.19.0",
+      "onFail": "download"
+    }
+  }
+}

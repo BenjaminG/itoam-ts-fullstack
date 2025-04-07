@@ -1,0 +1,18 @@
+{
+  "name": "@itoam/types",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build tsconfig.build.json",
+    "dev": "tsx --conditions=development --watch src/index.ts",
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit"
+  }
+}

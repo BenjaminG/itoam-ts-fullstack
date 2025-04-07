@@ -1,0 +1,9 @@
+{
+  "extends": "@itoam/typescript-config/tsconfig.base.json",
+  "include": ["knip.ts"],
+  "compilerOptions": {
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext",
+    "noEmit": true
+  }
+}

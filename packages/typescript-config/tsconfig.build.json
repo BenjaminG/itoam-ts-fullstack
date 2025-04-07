@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Build",
+  "extends": "./tsconfig.node.json",
+  "include": ["${configDir}/src/**/*.ts"],
+  "exclude": [
+    "**/node_modules",
+    "**/.*/",
+    "${configDir}/dist",
+    "${configDir}/src/**/*.test.ts"
+  ],
+  "compilerOptions": {
+    "outDir": "${configDir}/dist",
+    "rootDir": "${configDir}/src"
+  }
+}

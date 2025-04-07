@@ -1,0 +1,6 @@
+{
+  "extends": "@itoam/typescript-config/tsconfig.react.json",
+  "compilerOptions": {
+    "types": ["vite/client"]
+  }
+}

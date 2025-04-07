@@ -1,0 +1,19 @@
+{
+  "files.exclude": {
+    "**/tsconfig.*.tsbuildinfo": true
+  },
+  "search.exclude": {
+    "pnpm-lock.yaml": true
+  },
+  "editor.tabSize": 2,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.formatDocument": "explicit",
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.validate": ["typescript", "typescriptreact"],
+  "eslint.codeAction.showDocumentation": {
+    "enable": true
+  }
+}

@@ -1,0 +1,23 @@
+FROM node:22.19.0-slim AS base
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+
+RUN apt-get update && apt-get install -y netcat-traditional
+
+RUN corepack enable \
+  && mkdir -p $PNPM_HOME && chown -R node:node $PNPM_HOME \
+  && mkdir -p /deploy && chown -R node:node /deploy
+
+WORKDIR /home/node
+
+USER node
+
+COPY --chown=node:node package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+
+RUN --mount=type=cache,sharing=locked,uid=1000,gid=1000,id=pnpm,target=/pnpm/store \
+  pnpm fetch
+
+COPY --chown=node:node packages ./packages
+
+RUN pnpm install --frozen-lockfile --prefer-offline --ignore-scripts

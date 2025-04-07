@@ -1,0 +1,31 @@
+{
+  "name": "@itoam/trpc-api",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build tsconfig.build.json",
+    "dev": "tsx --conditions=development --watch src/index.ts",
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@itoam/database": "workspace:*",
+    "@itoam/types": "workspace:*",
+    "@trpc/client": "11.6.0",
+    "@trpc/server": "11.6.0",
+    "drizzle-orm": "0.44.6",
+    "drizzle-zod": "0.8.3",
+    "superjson": "2.2.3",
+    "zod": "4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "22.18.12"
+  }
+}

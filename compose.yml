@@ -1,0 +1,83 @@
+x-defaults: &defaults
+  restart: unless-stopped
+  init: true
+  networks:
+    - network
+  environment: &environment
+    NODE_ENV: development
+    DATABASE_URL: postgresql://postgres:postgres@postgres:5432/postgres
+    LOG_LEVEL: debug
+
+  logging: &logging
+    driver: 'json-file'
+    options:
+      max-size: '5m'
+      max-file: '10'
+      tag: '{{.Name}}'
+
+  healthcheck: &healthcheck
+    interval: 5s
+    timeout: 4s
+    retries: 3
+    start_period: 5s
+
+name: itoam-ts-fullstack
+
+networks:
+  network:
+    driver: bridge
+
+volumes:
+  postgres:
+
+services:
+  postgres:
+    <<: *defaults
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres:/var/lib/postgresql
+    ports:
+      - 5432:5432
+    healthcheck:
+      <<: *healthcheck
+      test: ['CMD', 'pg_isready', '-U', 'postgres']
+
+  api:
+    <<: *defaults
+    command: pnpm run -C apps/api dev
+    build:
+      context: .
+      dockerfile: apps/Dockerfile.dev
+    volumes:
+      - ./apps/api:/home/node/apps/api
+      - ./packages:/home/node/packages
+    ports:
+      - 3000:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck
+      test: ['CMD', 'nc', '-zv', 'localhost', '3000']
+
+  web:
+    <<: *defaults
+    command: pnpm run -C apps/web dev
+    build:
+      context: .
+      dockerfile: apps/Dockerfile.dev
+    volumes:
+      - ./apps/web:/home/node/apps/web
+      - ./packages:/home/node/packages
+    ports:
+      - 5173:5173
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck
+      test: ['CMD', 'nc', '-zv', 'localhost', '5173']

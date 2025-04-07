@@ -1,0 +1,10 @@
+{
+  "name": "@itoam/typescript-config",
+  "private": true,
+  "files": [
+    "tsconfig.base.json",
+    "tsconfig.node.json",
+    "tsconfig.react.json",
+    "tsconfig.build.json"
+  ]
+}

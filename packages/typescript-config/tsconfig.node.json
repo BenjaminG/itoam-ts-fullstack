@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Node",
+  "extends": "./tsconfig.base.json",
+  "include": ["${configDir}/**/*.ts"],
+  "exclude": ["**/node_modules", "**/.*/", "${configDir}/dist"],
+  "compilerOptions": {
+    "rootDir": "${configDir}",
+    "lib": ["esnext"],
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext",
+    "sourceMap": true
+  }
+}
