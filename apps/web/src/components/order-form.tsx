@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query'
 import { trpc, queryClient } from '@/utils'
 import { Button, Input } from '@itoam/ui'
 import { Card } from '@/components/ui/card'
+import { Slider } from '@/components/ui/slider'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import {
   calculateMargin,
@@ -14,7 +15,7 @@ export function OrderForm() {
   const [formData, setFormData] = useState({
     side: 'b' as 'b' | 's',
     quantity: '',
-    leverage: '',
+    leverage: '1',
     entryPrice: '',
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -27,7 +28,7 @@ export function OrderForm() {
         setFormData({
           side: 'b',
           quantity: '',
-          leverage: '',
+          leverage: '1',
           entryPrice: '',
         })
         setErrors({})
@@ -128,39 +129,43 @@ export function OrderForm() {
   }
 
   return (
-    <Card className="border-0 bg-card p-6">
-      <h2 className="mb-2 text-2xl font-bold text-foreground">Trade Parameters</h2>
-      <p className="mb-6 text-sm text-muted-foreground">Configure your position details</p>
+    <Card className="bg-card border-0 p-6">
+      <h2 className="text-foreground mb-2 text-2xl font-bold">
+        Trade Parameters
+      </h2>
+      <p className="text-muted-foreground mb-6 text-sm">
+        Configure your position details
+      </p>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-8">
         {/* Side Selector */}
         <div>
-          <label className="mb-3 block text-sm font-semibold text-foreground">
+          <label className="text-foreground mb-3 block text-sm font-semibold">
             Position Side
           </label>
           <div className="flex gap-3">
             <Button
               type="button"
               onClick={() => setFormData({ ...formData, side: 'b' })}
-              className={`flex-1 h-10 transition-all ${
+              className={`h-14 flex-1 text-lg font-bold transition-all ${
                 formData.side === 'b'
-                  ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/30'
-                  : 'bg-secondary text-foreground hover:bg-secondary/80 border border-border'
+                  ? 'bg-gradient-to-r from-emerald-500 to-green-400 text-white shadow-emerald-500/40 hover:from-emerald-600 hover:to-emerald-500'
+                  : 'bg-secondary text-foreground hover:bg-secondary/80 border-border border'
               }`}
             >
-              <TrendingUp className="mr-2 inline h-4 w-4" />
+              <TrendingUp className="mr-2 inline h-5 w-5" />
               Long / Buy
             </Button>
             <Button
               type="button"
               onClick={() => setFormData({ ...formData, side: 's' })}
-              className={`flex-1 h-10 transition-all ${
+              className={`h-14 flex-1 text-lg font-bold transition-all ${
                 formData.side === 's'
-                  ? 'bg-rose-500 text-white hover:bg-rose-600 shadow-lg shadow-rose-500/30'
-                  : 'bg-secondary text-foreground hover:bg-secondary/80 border border-border'
+                  ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-rose-500/40 hover:from-rose-600 hover:to-pink-600'
+                  : 'bg-secondary text-foreground hover:bg-secondary/80 border-border border'
               }`}
             >
-              <TrendingDown className="mr-2 inline h-4 w-4" />
+              <TrendingDown className="mr-2 inline h-5 w-5" />
               Short / Sell
             </Button>
           </div>
@@ -170,7 +175,7 @@ export function OrderForm() {
         <div>
           <label
             htmlFor="quantity"
-            className="mb-2 block text-sm font-semibold text-foreground"
+            className="text-foreground mb-2 block text-sm font-semibold"
           >
             Quantity
           </label>
@@ -186,23 +191,27 @@ export function OrderForm() {
                 setFormData({ ...formData, quantity: e.target.value })
               }
               placeholder="Enter amount"
-              className={`w-full bg-muted border-border text-foreground placeholder:text-muted-foreground ${
+              className={`bg-muted border-border text-foreground placeholder:text-muted-foreground w-full ${
                 errors.quantity ? 'border-destructive' : ''
               }`}
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">USD</span>
+            <span className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2">
+              USD
+            </span>
           </div>
           {errors.quantity && (
-            <p className="mt-1 text-xs text-destructive">{errors.quantity}</p>
+            <p className="text-destructive mt-1 text-xs">{errors.quantity}</p>
           )}
-          <p className="mt-1 text-xs text-muted-foreground">Range: 1 - 500,000 USD</p>
+          <p className="text-muted-foreground mt-1 text-xs">
+            Range: 1 - 500,000 USD
+          </p>
         </div>
 
         {/* Leverage Input */}
         <div>
           <label
             htmlFor="leverage"
-            className="mb-2 block text-sm font-semibold text-foreground"
+            className="text-foreground mb-2 block text-sm font-semibold"
           >
             Leverage
           </label>
@@ -218,28 +227,53 @@ export function OrderForm() {
                 setFormData({ ...formData, leverage: e.target.value })
               }
               placeholder="Enter leverage"
-              className={`w-full bg-muted border-border text-foreground placeholder:text-muted-foreground ${
+              className={`bg-muted border-border text-foreground placeholder:text-muted-foreground w-full ${
                 errors.leverage ? 'border-destructive' : ''
               }`}
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">x</span>
+            <span className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2">
+              x
+            </span>
           </div>
+
+          {/* Leverage Slider */}
+          <div className="mt-4 space-y-3">
+            <Slider
+              value={[parseInt(formData.leverage) || 1]}
+              onValueChange={(value) => {
+                if (value[0] !== undefined) {
+                  setFormData({ ...formData, leverage: value[0].toString() })
+                }
+              }}
+              min={1}
+              max={100}
+              step={1}
+              className="w-full"
+            />
+            <div className="flex justify-between text-xs font-medium">
+              <span className="text-emerald-500">x1 · Safe</span>
+              <span className="text-rose-500">Wild · x100</span>
+            </div>
+          </div>
+
           {errors.leverage && (
-            <p className="mt-1 text-xs text-destructive">{errors.leverage}</p>
+            <p className="text-destructive mt-1 text-xs">{errors.leverage}</p>
           )}
-          <p className="mt-1 text-xs text-muted-foreground">Range: 1x - 100x</p>
+          <p className="text-muted-foreground mt-1 text-xs">Range: 1x - 100x</p>
         </div>
 
         {/* Entry Price Input */}
         <div>
           <label
             htmlFor="entryPrice"
-            className="mb-2 block text-sm font-semibold text-foreground"
+            className="text-foreground mb-2 block text-sm font-semibold"
           >
             Entry Price
           </label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+            <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
+              $
+            </span>
             <Input
               id="entryPrice"
               type="number"
@@ -249,39 +283,45 @@ export function OrderForm() {
                 setFormData({ ...formData, entryPrice: e.target.value })
               }
               placeholder="0.00"
-              className={`w-full bg-muted border-border pl-7 text-foreground placeholder:text-muted-foreground ${
+              className={`bg-muted border-border text-foreground placeholder:text-muted-foreground w-full pl-7 ${
                 errors.entryPrice ? 'border-destructive' : ''
               }`}
             />
           </div>
           {errors.entryPrice && (
-            <p className="mt-1 text-xs text-destructive">{errors.entryPrice}</p>
+            <p className="text-destructive mt-1 text-xs">{errors.entryPrice}</p>
           )}
-          <p className="mt-1 text-xs text-muted-foreground">Increments of 0.5 USD</p>
+          <p className="text-muted-foreground mt-1 text-xs">
+            Increments of 0.5 USD
+          </p>
         </div>
 
         {/* Live Calculation Display */}
         {calculations && (
-          <div className="space-y-2 rounded-lg border border-border bg-muted/50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <div className="border-border from-muted/80 to-muted/40 space-y-3 rounded-lg border bg-gradient-to-br p-6">
+            <p className="text-muted-foreground text-[10px] font-semibold tracking-widest uppercase">
               Live Calculation
             </p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-8">
               <div>
-                <p className="text-xs text-muted-foreground">Margin Required</p>
-                <p className="font-mono text-lg font-bold text-primary">
+                <p className="text-muted-foreground mb-1 text-[10px] font-medium tracking-wide">
+                  Margin Required
+                </p>
+                <p className="text-primary font-mono text-xl font-bold tracking-normal tabular-nums">
                   {calculations.margin.toLocaleString()}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-[10px]">
                   {calculations.marginBtc.toFixed(8)} BTC
                 </p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Liquidation Price</p>
-                <p className="font-mono text-lg font-bold text-primary">
+                <p className="text-muted-foreground mb-1 text-[10px] font-medium tracking-wide">
+                  Liquidation Price
+                </p>
+                <p className="text-primary font-mono text-xl font-bold tracking-normal tabular-nums">
                   ${calculations.liquidationPrice.toFixed(1)}
                 </p>
-                <p className="text-xs text-muted-foreground">USD</p>
+                <p className="text-muted-foreground mt-1 text-[10px]">USD</p>
               </div>
             </div>
           </div>
@@ -289,8 +329,8 @@ export function OrderForm() {
 
         {/* Error Display */}
         {errors.submit && (
-          <div className="rounded-lg border border-destructive bg-destructive/10 p-3">
-            <p className="text-sm text-destructive">{errors.submit}</p>
+          <div className="border-destructive bg-destructive/10 rounded-lg border p-3">
+            <p className="text-destructive text-sm">{errors.submit}</p>
           </div>
         )}
 
@@ -298,7 +338,7 @@ export function OrderForm() {
         <Button
           type="submit"
           disabled={createOrderMutation.isPending}
-          className="w-full bg-emerald-500 text-white hover:bg-emerald-600 disabled:bg-muted disabled:text-muted-foreground"
+          className="disabled:bg-muted disabled:text-muted-foreground w-full bg-gradient-to-r from-emerald-500 to-emerald-400 py-3 font-semibold text-white shadow-lg shadow-emerald-500/30 hover:from-emerald-600 hover:to-emerald-500 disabled:shadow-none"
         >
           {createOrderMutation.isPending ? 'Creating Order...' : 'Create Order'}
         </Button>
