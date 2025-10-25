@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@itoam/database": "workspace:*",
+    "@itoam/shared": "workspace:*",
     "@itoam/types": "workspace:*",
     "@trpc/client": "11.6.0",
     "@trpc/server": "11.6.0",

@@ -1,11 +1,13 @@
 import { createTRPCRouter, createProcedure } from './trpc.js'
 import { z } from 'zod/v4'
-import { users } from '@itoam/database/schema'
+import { users, orders } from '@itoam/database/schema'
 import { createSelectSchema } from 'drizzle-zod'
 import { eq, desc } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
+import { calculateMargin, calculateLiquidationPrice } from '@itoam/shared'
 
 const usersSelectSchema = createSelectSchema(users)
+const ordersSelectSchema = createSelectSchema(orders)
 
 const procedure = createProcedure
   .use(async ({ ctx, next, getRawInput, path, type }) => {
@@ -71,6 +73,77 @@ export const router = createTRPCRouter({
       }
 
       return user
+    }),
+  getOrders: procedure
+    .output(z.array(ordersSelectSchema))
+    .query(async ({ ctx }) => {
+      return ctx.db.select().from(orders).orderBy(desc(orders.createdAt))
+    }),
+  createOrder: procedure
+    .input(
+      z.object({
+        side: z.enum(['b', 's']).describe('Buy (b) or Sell (s)'),
+        quantity: z.coerce
+          .number()
+          .min(1, 'Quantity must be at least 1')
+          .max(500000, 'Quantity cannot exceed 500,000')
+          .describe('Position size in USD'),
+        leverage: z.coerce
+          .number()
+          .min(1, 'Leverage must be at least 1')
+          .max(100, 'Leverage cannot exceed 100')
+          .describe('Leverage multiplier'),
+        entryPrice: z.coerce
+          .number()
+          .positive('Entry price must be positive')
+          .describe('Entry price in USD (step: 0.5)'),
+      })
+    )
+    .output(ordersSelectSchema)
+    .mutation(async ({ ctx, input }) => {
+      // Validate entry price step (0.5)
+      const priceRounded = Math.round(input.entryPrice * 2) / 2
+      if (Math.abs(priceRounded - input.entryPrice) > 0.001) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Entry price must be rounded to nearest 0.5',
+        })
+      }
+
+      // Calculate margin and liquidation price
+      const margin = calculateMargin(
+        input.quantity,
+        input.entryPrice,
+        input.leverage
+      )
+      const liquidationPrice = calculateLiquidationPrice(
+        input.side,
+        input.entryPrice,
+        margin,
+        input.quantity
+      )
+
+      // Insert order into database
+      const [order] = await ctx.db
+        .insert(orders)
+        .values({
+          side: input.side,
+          quantity: input.quantity.toString(),
+          leverage: input.leverage.toString(),
+          entryPrice: input.entryPrice.toString(),
+          margin,
+          liquidationPrice: liquidationPrice.toString(),
+        })
+        .returning()
+
+      if (!order) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to create order',
+        })
+      }
+
+      return order
     }),
 })
 

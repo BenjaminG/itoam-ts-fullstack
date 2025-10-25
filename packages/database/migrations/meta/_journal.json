@@ -15,6 +15,13 @@
       "when": 1750874642803,
       "tag": "0001_reflective_phil_sheldon",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1761387528476,
+      "tag": "0002_gray_spot",
+      "breakpoints": true
     }
   ]
 }

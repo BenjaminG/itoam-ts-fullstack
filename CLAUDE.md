@@ -15,6 +15,7 @@ This is a TypeScript fullstack application for a crypto trading platform built w
 ## Commands
 
 ### Development
+
 - `pnpm start` - Starts all services (PostgreSQL, API server on :3000, Web frontend on :5173) using Docker Compose
 - `pnpm run -C apps/api dev` - Run API in dev mode with tsx watch
 - `pnpm run -C apps/web dev` - Run frontend dev server
@@ -22,6 +23,7 @@ This is a TypeScript fullstack application for a crypto trading platform built w
 - `pnpm run -C packages/database seed` - Seed database with initial data
 
 ### Code Quality
+
 - `pnpm run ci` - Full CI pipeline: spell-check → format → knip → lint → type-check → build
 - `pnpm lint` - Run ESLint on all packages
 - `pnpm type-check` - TypeScript type checking across all packages
@@ -30,6 +32,7 @@ This is a TypeScript fullstack application for a crypto trading platform built w
 - `pnpm run spell-check` - Check spelling
 
 ### Build & Cleanup
+
 - `pnpm build` - Build all packages (pnpm run --recursive build)
 - `pnpm stop` - Stop all Docker containers and remove volumes
 - `pnpm run clean` - Clean build artifacts and cache
@@ -55,12 +58,14 @@ packages/
 ### Backend Architecture (apps/api)
 
 **Entry Point**: `src/index.ts`
+
 - Creates Fastify server with tRPC plugin at `/trpc` prefix
 - Sets up CORS with wildcard origin
 - Initializes database client and event emitter
 - Listens on port 3000
 
 **Key Components**:
+
 - **Database Client**: Drizzle ORM connected to PostgreSQL
 - **Event Emitter**: Node.js EventEmitter typed with `ApiEvents` from @itoam/types
   - Subscribes to LN Markets WebSocket API for 1-minute OHLC data
@@ -68,22 +73,26 @@ packages/
 - **tRPC Router**: Type-safe API procedures with middleware for logging and error handling
 
 **Middleware Pattern** (packages/trpc-api/src/router.ts):
+
 - Request logging middleware logs all incoming requests with path, type, and data
 - Error logging middleware logs failed operations
 
 ### Frontend Architecture (apps/web)
 
 **Key Setup**:
+
 - **tRPC Client**: Initialized in `src/utils.ts` with httpLink to `http://localhost:3000/trpc`
 - **Query Client**: TanStack React Query for cache management
 - **SuperJSON Transformer**: Used for both client and server for complex data serialization
 
 **Data Flow**:
+
 - Components use `useQuery(trpc.procedureName.queryOptions())` for queries
 - Use `useMutation(trpc.procedureName.mutationOptions())` for mutations
 - React Query handles caching and auto-invalidation
 
 **Component Pattern** (see `src/components/users.tsx`):
+
 - Use TanStack React Query hooks directly with tRPC options
 - `trpc.procedureName.queryOptions()` returns React Query options
 - `queryClient.invalidateQueries(trpc.procedureName.queryFilter())` for cache invalidation
@@ -91,20 +100,24 @@ packages/
 ### Database Layer (packages/database)
 
 **Schema** (`src/schema.ts`):
+
 - Defined using Drizzle ORM `pgTable()` helper
 - Exports PostgreSQL tables (e.g., `users` with UUID PK, email, password, balance, createdAt)
 
 **Client** (`src/client.ts`):
+
 - Factory function `createClient()` returns Drizzle database instance
 - Uses DATABASE_URL env var or localhost connection string
 
 **Migrations & Seeding**:
+
 - `drizzle-kit migrate` runs SQL migrations
 - `scripts/seed.ts` provides initial data
 
 ### Type Safety
 
 **Type Exports** (packages/types):
+
 - `ApiEvents`: Type definition for event emitter events
 - `OHLC`: Candle data structure (Open, High, Low, Close)
 - Export these from the types package for shared use
@@ -121,13 +134,12 @@ packages/
 6. Errors are typed with TRPCError for proper client handling
 
 **Example**:
+
 ```typescript
 export const router = createTRPCRouter({
-  getUsers: procedure
-    .output(z.array(userSchema))
-    .query(async ({ ctx }) => {
-      return ctx.db.select().from(users)
-    }),
+  getUsers: procedure.output(z.array(userSchema)).query(async ({ ctx }) => {
+    return ctx.db.select().from(users)
+  }),
 })
 ```
 
@@ -150,19 +162,22 @@ export const router = createTRPCRouter({
 - **All Packages Mandatory**: Currently installed packages must be used; additional packages require justification
 - **Event System**: Backend uses Node.js EventEmitter for real-time data streaming from external APIs
 - **Docker Compose**: Local development uses Docker for PostgreSQL and services
-- **Workspace**: Uses pnpm monorepo with local package references (workspace:*)
+- **Workspace**: Uses pnpm monorepo with local package references (workspace:\*)
 
 ## Useful Development Patterns
 
 ### Running Single Tests
+
 Not explicitly configured, but tests can be added using ts-node or tsx with test frameworks integrated into existing lint/type-check pipeline.
 
 ### Debugging
+
 - Frontend: Open DevTools in browser (Vite dev server on :5173)
 - Backend: Use `tsx --watch` which is configured in api dev command
 - Database: Connect directly to postgres:5432 (user: postgres, pwd: postgres)
 
 ### Environment Variables
+
 - `DATABASE_URL`: PostgreSQL connection string (defaults to localhost)
 - `NODE_ENV`: Set to 'development' by Docker Compose
 - `LOG_LEVEL`: Set to 'debug' by Docker Compose

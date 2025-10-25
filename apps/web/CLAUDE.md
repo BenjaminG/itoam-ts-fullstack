@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is the React 19 frontend application for the itoam crypto trading platform. It's built with Vite, TailwindCSS 4, and integrated with the tRPC backend via type-safe API calls.
 
 **Tech Stack**:
+
 - **React**: 19.2.0 with concurrent features
 - **Build Tool**: Vite 7.1.12 with HMR
 - **Styling**: TailwindCSS 4.1.16 with CSS variables for theming
@@ -103,7 +104,7 @@ export const trpc = createTRPCOptionsProxy<ApiRouter>({
     links: [
       httpLink({
         url: `http://localhost:3000/trpc`,
-        transformer: superJSON,  // Handles Date, Map serialization
+        transformer: superJSON, // Handles Date, Map serialization
       }),
     ],
   }),
@@ -190,7 +191,7 @@ try {
   await mutation.mutateAsync(data)
 } catch (error) {
   if (error instanceof Error) {
-    console.error(error.message)  // TRPCClientError message
+    console.error(error.message) // TRPCClientError message
   }
 }
 ```
@@ -217,6 +218,7 @@ The app uses TailwindCSS 4 with OKLch color spaces and CSS variables for theming
 ```
 
 All theme colors are available as Tailwind utilities:
+
 - `bg-primary`, `text-foreground`, `border-border`, etc.
 - `bg-destructive`, `bg-muted`, `bg-accent`, `bg-sidebar`
 - `ring-ring` for focus states
@@ -237,6 +239,7 @@ className={cn(
 ```
 
 **Never do this**:
+
 ```typescript
 // ❌ Wrong - Tailwind conflicts not resolved
 className={`px-2 ${condition && 'px-4'}`}
@@ -265,6 +268,7 @@ export function MyButton() {
 ```
 
 **Available Variants** (see `@itoam/ui` for base Button):
+
 - Variants: `default`, `destructive`, `outline`, `secondary`, `ghost`, `link`
 - Sizes: `default`, `sm`, `lg`, `icon`
 
@@ -293,6 +297,7 @@ import { cn } from '../../lib/utils'
 ```
 
 Configured in:
+
 - `vite.config.ts`: Path resolution
 - `tsconfig.json`: TypeScript path mapping
 
@@ -442,6 +447,7 @@ The build output is a static site ready to deploy to any CDN or static host.
 ## Environment Variables
 
 None required for local development - the app assumes:
+
 - Backend API on `http://localhost:3000/trpc`
 - Database accessible via API
 - All configuration happens via Docker Compose in root
