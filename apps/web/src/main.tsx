@@ -4,7 +4,6 @@ import { App } from './app.tsx'
 import { QueryClientProvider } from '@tanstack/react-query'
 
 import './index.css'
-import '@itoam/ui/globals.css'
 import { queryClient } from './utils.ts'
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- If it's not defined we are going to have a bad time

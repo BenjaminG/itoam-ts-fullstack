@@ -52,5 +52,11 @@
       "version": "10.19.0",
       "onFail": "download"
     }
+  },
+  "dependencies": {
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "lucide-react": "0.548.0",
+    "tailwind-merge": "3.3.1"
   }
 }
