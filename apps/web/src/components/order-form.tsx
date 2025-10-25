@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react'
 import { useMutation } from '@tanstack/react-query'
+import { NumericFormat } from 'react-number-format'
 import { trpc, queryClient } from '@/utils'
-import { Button, Input } from '@itoam/ui'
+import { Button } from '@itoam/ui'
 import { Card } from '@/components/ui/card'
 import { Slider } from '@/components/ui/slider'
 import { TrendingUp, TrendingDown } from 'lucide-react'
@@ -180,18 +181,15 @@ export function OrderForm() {
             Quantity
           </label>
           <div className="relative">
-            <Input
+            <NumericFormat
               id="quantity"
-              type="number"
-              min="1"
-              max="500000"
-              step="1"
+              thousandSeparator=","
               value={formData.quantity}
-              onChange={(e) =>
-                setFormData({ ...formData, quantity: e.target.value })
+              onValueChange={(values) =>
+                setFormData({ ...formData, quantity: values.value })
               }
               placeholder="Enter amount"
-              className={`bg-muted border-border text-foreground placeholder:text-muted-foreground w-full ${
+              className={`bg-muted border-border text-foreground placeholder:text-muted-foreground w-full rounded border px-3 py-2 ${
                 errors.quantity ? 'border-destructive' : ''
               }`}
             />
@@ -216,18 +214,14 @@ export function OrderForm() {
             Leverage
           </label>
           <div className="relative">
-            <Input
+            <NumericFormat
               id="leverage"
-              type="number"
-              min="1"
-              max="100"
-              step="1"
               value={formData.leverage}
-              onChange={(e) =>
-                setFormData({ ...formData, leverage: e.target.value })
+              onValueChange={(values) =>
+                setFormData({ ...formData, leverage: values.value })
               }
               placeholder="Enter leverage"
-              className={`bg-muted border-border text-foreground placeholder:text-muted-foreground w-full ${
+              className={`bg-muted border-border text-foreground placeholder:text-muted-foreground w-full rounded border px-3 py-2 ${
                 errors.leverage ? 'border-destructive' : ''
               }`}
             />
@@ -271,19 +265,18 @@ export function OrderForm() {
             Entry Price
           </label>
           <div className="relative">
-            <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2">
-              $
-            </span>
-            <Input
+            <NumericFormat
               id="entryPrice"
-              type="number"
-              step="0.5"
+              prefix="$"
+              thousandSeparator=","
+              decimalScale={2}
+              fixedDecimalScale
               value={formData.entryPrice}
-              onChange={(e) =>
-                setFormData({ ...formData, entryPrice: e.target.value })
+              onValueChange={(values) =>
+                setFormData({ ...formData, entryPrice: values.value })
               }
-              placeholder="0.00"
-              className={`bg-muted border-border text-foreground placeholder:text-muted-foreground w-full pl-7 ${
+              placeholder="$0.00"
+              className={`bg-muted border-border text-foreground placeholder:text-muted-foreground w-full rounded border px-3 py-2 ${
                 errors.entryPrice ? 'border-destructive' : ''
               }`}
             />

@@ -12,20 +12,30 @@
     "sql",
     "en-gb"
   ],
-  "ignorePaths": ["pnpm-lock.yaml", "dist", "packages/database/migrations"],
+  "ignorePaths": [
+    "pnpm-lock.yaml",
+    "dist",
+    "packages/database/migrations",
+    "template"
+  ],
   "words": [
+    "cmdk",
     "drizzle",
+    "Embla",
     "eventsource",
     "fullstack",
     "isready",
     "itoam",
     "lnmarkets",
     "netcat",
+    "nums",
     "OHLC",
     "orm",
     "ossp",
     "shadcn",
+    "tabular",
     "trpc",
+    "vaul",
     "vafanassieff"
   ]
 }

@@ -3,15 +3,14 @@ import { OrdersTable } from './components/orders-table.tsx'
 
 export function App() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <div className="mx-auto max-w-7xl px-4 py-12">
         {/* Header */}
         <div className="mb-12">
-          <h1 className="text-4xl font-bold text-foreground">
-            Futures Pricer
-          </h1>
-          <p className="mt-2 text-foreground/60">
-            Calculate margin requirements and liquidation prices for inverse futures contracts
+          <h1 className="text-foreground text-4xl font-bold">Futures Pricer</h1>
+          <p className="text-foreground/60 mt-2">
+            Calculate margin requirements and liquidation prices for inverse
+            futures contracts
           </p>
         </div>
 

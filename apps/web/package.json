@@ -24,6 +24,7 @@
     "@trpc/tanstack-react-query": "11.6.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "react-number-format": "5.4.4",
     "superjson": "2.2.3",
     "tailwindcss": "4.1.16"
   },
