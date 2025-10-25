@@ -61,22 +61,31 @@ export function OrderForm() {
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {}
 
-    const qty = parseFloat(formData.quantity)
+    const qty = parseInt(formData.quantity, 10)
     if (!formData.quantity) {
       newErrors.quantity = 'Quantity is required'
+    } else if (!Number.isInteger(qty)) {
+      newErrors.quantity = 'Quantity must be an integer'
     } else if (qty < 1) {
       newErrors.quantity = 'Quantity must be at least 1'
     } else if (qty > 500000) {
       newErrors.quantity = 'Quantity cannot exceed 500,000'
     }
 
-    const lev = parseFloat(formData.leverage)
+    const lev = parseInt(formData.leverage, 10)
     if (!formData.leverage) {
       newErrors.leverage = 'Leverage is required'
+    } else if (!Number.isInteger(lev)) {
+      newErrors.leverage = 'Leverage must be an integer'
     } else if (lev < 1) {
       newErrors.leverage = 'Leverage must be at least 1'
     } else if (lev > 100) {
       newErrors.leverage = 'Leverage cannot exceed 100'
+    }
+
+    // Validate short position + 1x leverage edge case
+    if (formData.side === 's' && lev === 1) {
+      newErrors.leverage = 'Short positions require leverage of 2x or higher'
     }
 
     const price = parseFloat(formData.entryPrice)
@@ -105,8 +114,8 @@ export function OrderForm() {
     try {
       await createOrderMutation.mutateAsync({
         side: formData.side,
-        quantity: parseFloat(formData.quantity),
-        leverage: parseFloat(formData.leverage),
+        quantity: parseInt(formData.quantity, 10),
+        leverage: parseInt(formData.leverage, 10),
         entryPrice: parseFloat(formData.entryPrice),
       })
     } catch (error) {

@@ -3,9 +3,10 @@ import { trpc } from '@/utils'
 import { satsToBtc } from '@itoam/shared'
 
 export function OrdersTable() {
-  const { data: ordersData, isLoading } = useQuery(
-    trpc.getOrders.queryOptions()
-  )
+  const { data: ordersData, isLoading } = useQuery({
+    ...trpc.getOrders.queryOptions(),
+    refetchInterval: 5000,
+  })
 
   if (isLoading) {
     return (
@@ -95,10 +96,10 @@ export function OrdersTable() {
                     ${parseFloat(order.quantity).toLocaleString()}
                   </td>
                   <td className="px-6 py-4 font-mono text-sm whitespace-nowrap text-gray-900">
-                    {parseFloat(order.leverage).toFixed(1)}x
+                    {parseFloat(order.leverage).toFixed(0)}x
                   </td>
                   <td className="px-6 py-4 font-mono text-sm whitespace-nowrap text-gray-900">
-                    ${parseFloat(order.entryPrice).toFixed(2)}
+                    ${parseFloat(order.entryPrice).toFixed(1)}
                   </td>
                   <td className="px-6 py-4 font-mono text-sm whitespace-nowrap text-gray-900">
                     <div>
@@ -109,7 +110,7 @@ export function OrdersTable() {
                     </div>
                   </td>
                   <td className="px-6 py-4 font-mono text-sm whitespace-nowrap text-gray-900">
-                    ${parseFloat(order.liquidationPrice).toFixed(2)}
+                    ${parseFloat(order.liquidationPrice).toFixed(1)}
                   </td>
                   <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-700">
                     {new Date(order.createdAt).toLocaleString()}

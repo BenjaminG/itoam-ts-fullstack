@@ -85,11 +85,13 @@ export const router = createTRPCRouter({
         side: z.enum(['b', 's']).describe('Buy (b) or Sell (s)'),
         quantity: z.coerce
           .number()
+          .int('Quantity must be an integer')
           .min(1, 'Quantity must be at least 1')
           .max(500000, 'Quantity cannot exceed 500,000')
           .describe('Position size in USD'),
         leverage: z.coerce
           .number()
+          .int('Leverage must be an integer')
           .min(1, 'Leverage must be at least 1')
           .max(100, 'Leverage cannot exceed 100')
           .describe('Leverage multiplier'),
@@ -101,6 +103,14 @@ export const router = createTRPCRouter({
     )
     .output(ordersSelectSchema)
     .mutation(async ({ ctx, input }) => {
+      // Validate short position + 1x leverage edge case
+      if (input.side === 's' && input.leverage === 1) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Short positions require leverage of 2x or higher',
+        })
+      }
+
       // Validate entry price step (0.5)
       const priceRounded = Math.round(input.entryPrice * 2) / 2
       if (Math.abs(priceRounded - input.entryPrice) > 0.001) {

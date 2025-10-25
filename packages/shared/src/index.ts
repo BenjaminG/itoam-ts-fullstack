@@ -31,6 +31,9 @@ export const calculateMargin = (
  * Formula for Long: 1 / (1/EntryPrice + Margin/Quantity)
  * Formula for Short: 1 / (1/EntryPrice - Margin/Quantity)
  * Result is in USD, rounded to nearest 0.5
+ *
+ * Note: Short positions with leverage=1 would cause division by zero.
+ * This should be validated at the API level to reject such orders.
  */
 export const calculateLiquidationPrice = (
   side: 'b' | 's',
@@ -49,6 +52,12 @@ export const calculateLiquidationPrice = (
   } else {
     // Short position
     denominator = Decimal.sub(invEntryPrice, marginQtyRatio)
+    // Safety guard: denominator should never be zero or negative due to server-side validation
+    if (denominator.isZero() || denominator.isNegative()) {
+      throw new Error(
+        'Invalid position parameters: cannot calculate liquidation price for this combination'
+      )
+    }
   }
 
   const liquidationPrice = Decimal.div(1, denominator)
