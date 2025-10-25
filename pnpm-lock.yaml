@@ -7,19 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      class-variance-authority:
-        specifier: 0.7.1
-        version: 0.7.1
-      clsx:
-        specifier: 2.1.1
-        version: 2.1.1
-      lucide-react:
-        specifier: 0.548.0
-        version: 0.548.0(react@19.2.0)
-      tailwind-merge:
-        specifier: 3.3.1
-        version: 3.3.1
     devDependencies:
       '@eslint/js':
         specifier: 9.38.0
@@ -139,6 +126,15 @@ importers:
       '@trpc/tanstack-react-query':
         specifier: 11.6.0
         version: 11.6.0(@tanstack/react-query@5.90.5(react@19.2.0))(@trpc/client@11.6.0(@trpc/server@11.6.0(typescript@5.9.3))(typescript@5.9.3))(@trpc/server@11.6.0(typescript@5.9.3))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(typescript@5.9.3)
+      class-variance-authority:
+        specifier: 0.7.1
+        version: 0.7.1
+      clsx:
+        specifier: 2.1.1
+        version: 2.1.1
+      lucide-react:
+        specifier: 0.548.0
+        version: 0.548.0(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -151,6 +147,9 @@ importers:
       superjson:
         specifier: 2.2.3
         version: 2.2.3
+      tailwind-merge:
+        specifier: 3.3.1
+        version: 3.3.1
       tailwindcss:
         specifier: 4.1.16
         version: 4.1.16
