@@ -23,9 +23,9 @@ export function OrderForm() {
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const createOrderMutation = useMutation(
-    trpc.createOrder.mutationOptions({
+    trpc.orders.create.mutationOptions({
       onSuccess: async () => {
-        await queryClient.invalidateQueries(trpc.getOrders.queryFilter())
+        await queryClient.invalidateQueries(trpc.orders.list.queryFilter())
         // Reset form
         setFormData({
           side: 'b',

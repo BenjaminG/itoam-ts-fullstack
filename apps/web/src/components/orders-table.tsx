@@ -36,7 +36,7 @@ export function OrdersTable() {
   } = useInfiniteQuery({
     queryKey: ['orders', sideFilter],
     queryFn: async ({ pageParam }) =>
-      trpcClient.getOrders.query({
+      trpcClient.orders.list.query({
         limit: 20,
         cursor: pageParam as string | undefined,
         side: sideFilter === 'all' ? undefined : sideFilter,

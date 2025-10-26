@@ -9,7 +9,7 @@ import { calculateMargin, calculateLiquidationPrice } from '@itoam/shared'
 const usersSelectSchema = createSelectSchema(users)
 const ordersSelectSchema = createSelectSchema(orders)
 
-const procedure = createProcedure
+const loggedProcedure = createProcedure
   .use(async ({ ctx, next, getRawInput, path, type }) => {
     const rawInput = await getRawInput()
 
@@ -17,18 +17,24 @@ const procedure = createProcedure
 
     return next()
   })
-  .use(async ({ ctx, next }) => {
+  .use(async ({ ctx, next, path, type, getRawInput }) => {
     const result = await next()
 
     if (!result.ok) {
-      ctx.req.log.error({ error: result.error })
+      const rawInput = await getRawInput()
+      ctx.req.log.error({
+        error: result.error,
+        path,
+        type,
+        input: rawInput,
+      })
     }
 
     return result
   })
 
-export const router = createTRPCRouter({
-  getUsers: procedure
+const usersRouter = createTRPCRouter({
+  list: loggedProcedure
     .output(z.array(usersSelectSchema.omit({ password: true })))
     .query(async ({ ctx }) => {
       return ctx.db
@@ -41,7 +47,7 @@ export const router = createTRPCRouter({
         .from(users)
         .orderBy(desc(users.createdAt))
     }),
-  updateEmail: procedure
+  updateEmail: loggedProcedure
     .input(z.object({ id: z.string(), email: z.string() }))
     .output(usersSelectSchema.omit({ password: true }))
     .mutation(async ({ ctx, input }) => {
@@ -74,7 +80,10 @@ export const router = createTRPCRouter({
 
       return user
     }),
-  getOrders: procedure
+})
+
+const ordersRouter = createTRPCRouter({
+  list: loggedProcedure
     .input(
       z.object({
         limit: z.number().int().min(1).max(100).default(20),
@@ -108,23 +117,16 @@ export const router = createTRPCRouter({
       }
 
       // Build conditions - filter by cursor and optionally by side
-      const whereConditions: unknown[] = []
-      if (cursorCreatedAt) {
-        whereConditions.push(lt(orders.createdAt, cursorCreatedAt))
-      }
-      if (input.side) {
-        whereConditions.push(eq(orders.side, input.side))
-      }
+      const conditions = [
+        cursorCreatedAt ? lt(orders.createdAt, cursorCreatedAt) : undefined,
+        input.side ? eq(orders.side, input.side) : undefined,
+      ].filter((c): c is NonNullable<typeof c> => c !== undefined)
 
       // Build query - fetch orders with optional filtering
-      const results = await (
-        whereConditions.length > 0
-          ? ctx.db
-              .select()
-              .from(orders)
-              .where(and(...(whereConditions as Parameters<typeof and>)))
-          : ctx.db.select().from(orders)
-      )
+      const results = await ctx.db
+        .select()
+        .from(orders)
+        .where(conditions.length > 0 ? and(...conditions) : undefined)
         .orderBy(desc(orders.createdAt))
         .limit(fetchCount)
 
@@ -140,7 +142,7 @@ export const router = createTRPCRouter({
         nextCursor,
       }
     }),
-  createOrder: procedure
+  create: loggedProcedure
     .input(
       z.object({
         side: z.enum(['b', 's']).describe('Buy (b) or Sell (s)'),
@@ -216,6 +218,11 @@ export const router = createTRPCRouter({
 
       return order
     }),
+})
+
+export const router = createTRPCRouter({
+  users: usersRouter,
+  orders: ordersRouter,
 })
 
 export type ApiRouter = typeof router
