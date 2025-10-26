@@ -49,7 +49,12 @@ for (let i = 0; i < 100; i++) {
   const margin = calculateMargin(quantity, entryPrice, leverage)
 
   // Calculate liquidation price
-  const liquidationPrice = calculateLiquidationPrice(side, entryPrice, margin, quantity)
+  const liquidationPrice = calculateLiquidationPrice(
+    side,
+    entryPrice,
+    margin,
+    quantity
+  )
 
   // Random creation date in the past 30 days
   const daysAgo = randomInt(0, 30)

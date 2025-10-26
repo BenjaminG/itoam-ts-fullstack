@@ -6,10 +6,7 @@ import { NumericFormat } from 'react-number-format'
 import { satsToBtc } from '@itoam/shared'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from '@/components/ui/toggle-group'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { BarChart3, Loader2, TrendingUp, TrendingDown } from 'lucide-react'
 import type { ApiRouter } from '@itoam/trpc-api'
 import superJSON from 'superjson'
@@ -85,7 +82,7 @@ export function OrdersTable() {
   }
 
   return (
-    <Card className="bg-card border-0 p-6">
+    <Card className="bg-card flex flex-col border-0 p-6 lg:h-[870px]">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-foreground text-2xl font-bold">Order History</h2>
         <ToggleGroup
@@ -96,7 +93,7 @@ export function OrdersTable() {
               setSideFilter(value as 'all' | 'b' | 's')
             }
           }}
-          className="bg-muted/50 rounded-md p-1"
+          className="bg-background rounded-md p-1"
         >
           <ToggleGroupItem
             value="all"
@@ -110,7 +107,7 @@ export function OrdersTable() {
             aria-label="Long Orders"
             className="data-[state=on]:bg-emerald-500/20 data-[state=on]:text-emerald-300"
           >
-            <TrendingUp className="h-4 w-4 mr-1.5" />
+            <TrendingUp className="mr-1.5 h-4 w-4" />
             Long
           </ToggleGroupItem>
           <ToggleGroupItem
@@ -118,7 +115,7 @@ export function OrdersTable() {
             aria-label="Short Orders"
             className="data-[state=on]:bg-rose-500/20 data-[state=on]:text-rose-300"
           >
-            <TrendingDown className="h-4 w-4 mr-1.5" />
+            <TrendingDown className="mr-1.5 h-4 w-4" />
             Short
           </ToggleGroupItem>
         </ToggleGroup>
@@ -134,9 +131,9 @@ export function OrdersTable() {
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="relative min-h-0 flex-1 overflow-y-auto">
           <table className="w-full">
-            <thead>
+            <thead className="bg-card sticky top-0 z-10">
               <tr className="border-border border-b">
                 <th className="text-muted-foreground px-4 py-3 text-left text-xs font-semibold tracking-wide uppercase">
                   Date & Time

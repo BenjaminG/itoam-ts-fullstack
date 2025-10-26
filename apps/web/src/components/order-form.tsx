@@ -5,6 +5,7 @@ import { trpc, queryClient } from '@/utils'
 import { Button } from '@itoam/ui'
 import { Card } from '@/components/ui/card'
 import { Slider } from '@/components/ui/slider'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import {
   calculateMargin,
@@ -130,7 +131,7 @@ export function OrderForm() {
   }
 
   return (
-    <Card className="bg-card border-0 p-6">
+    <Card className="bg-card border-0 p-6 lg:h-[870px]">
       <h2 className="text-foreground mb-2 text-2xl font-bold">
         Trade Parameters
       </h2>
@@ -141,32 +142,33 @@ export function OrderForm() {
           <label className="text-foreground mb-3 block text-sm font-semibold">
             Position Side
           </label>
-          <div className="flex gap-3">
-            <Button
-              type="button"
-              onClick={() => setFormData({ ...formData, side: 'b' })}
-              className={`h-14 flex-1 text-lg font-bold transition-all ${
-                formData.side === 'b'
-                  ? 'bg-gradient-to-r from-emerald-500 to-green-400 text-white shadow-emerald-500/40 hover:from-emerald-600 hover:to-emerald-500'
-                  : 'bg-secondary text-foreground hover:bg-secondary/80 border-border border'
-              }`}
+          <ToggleGroup
+            type="single"
+            value={formData.side}
+            onValueChange={(value) => {
+              if (value) {
+                setFormData({ ...formData, side: value as 'b' | 's' })
+              }
+            }}
+            className="flex w-full"
+          >
+            <ToggleGroupItem
+              value="b"
+              aria-label="Long / Buy"
+              className="bg-secondary text-foreground border-border hover:bg-secondary/80 h-14 flex-1 border text-lg font-bold transition-all data-[state=on]:border-transparent data-[state=on]:bg-gradient-to-r data-[state=on]:from-emerald-500 data-[state=on]:to-green-400 data-[state=on]:text-white data-[state=on]:shadow-emerald-500/40 data-[state=on]:hover:from-emerald-600 data-[state=on]:hover:to-emerald-500"
             >
               <TrendingUp className="mr-2 inline h-5 w-5" />
               Long / Buy
-            </Button>
-            <Button
-              type="button"
-              onClick={() => setFormData({ ...formData, side: 's' })}
-              className={`h-14 flex-1 text-lg font-bold transition-all ${
-                formData.side === 's'
-                  ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-rose-500/40 hover:from-rose-600 hover:to-pink-600'
-                  : 'bg-secondary text-foreground hover:bg-secondary/80 border-border border'
-              }`}
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="s"
+              aria-label="Short / Sell"
+              className="bg-secondary text-foreground border-border hover:bg-secondary/80 h-14 flex-1 border text-lg font-bold transition-all data-[state=on]:border-transparent data-[state=on]:bg-gradient-to-r data-[state=on]:from-rose-500 data-[state=on]:to-pink-500 data-[state=on]:text-white data-[state=on]:shadow-rose-500/40 data-[state=on]:hover:from-rose-600 data-[state=on]:hover:to-pink-600"
             >
               <TrendingDown className="mr-2 inline h-5 w-5" />
               Short / Sell
-            </Button>
-          </div>
+            </ToggleGroupItem>
+          </ToggleGroup>
         </div>
 
         {/* Quantity Input */}
@@ -328,7 +330,7 @@ export function OrderForm() {
         <Button
           type="submit"
           disabled={createOrderMutation.isPending}
-          className="disabled:bg-muted disabled:text-muted-foreground w-full bg-gradient-to-r from-emerald-500 to-emerald-400 py-3 font-semibold text-white shadow-lg shadow-emerald-500/30 hover:from-emerald-600 hover:to-emerald-500 disabled:shadow-none"
+          className="disabled:bg-muted disabled:text-muted-foreground w-full bg-gradient-to-r from-emerald-500 to-green-400 py-3 font-semibold text-white hover:from-emerald-600 hover:to-emerald-500 disabled:shadow-none"
         >
           {createOrderMutation.isPending ? 'Creating Order...' : 'Create Order'}
         </Button>

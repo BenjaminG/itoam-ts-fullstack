@@ -15,7 +15,7 @@ export function App() {
         </div>
 
         {/* Two Column Layout */}
-        <div className="grid gap-8 lg:grid-cols-3">
+        <div className="grid gap-8 lg:grid-cols-3 lg:grid-rows-1">
           {/* Left Column: Form (1/3 width) */}
           <div className="lg:col-span-1">
             <OrderForm />

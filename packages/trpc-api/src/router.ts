@@ -117,12 +117,13 @@ export const router = createTRPCRouter({
       }
 
       // Build query - fetch orders with optional filtering
-      const results = await (whereConditions.length > 0
-        ? ctx.db
-            .select()
-            .from(orders)
-            .where(and(...(whereConditions as Parameters<typeof and>)))
-        : ctx.db.select().from(orders)
+      const results = await (
+        whereConditions.length > 0
+          ? ctx.db
+              .select()
+              .from(orders)
+              .where(and(...(whereConditions as Parameters<typeof and>)))
+          : ctx.db.select().from(orders)
       )
         .orderBy(desc(orders.createdAt))
         .limit(fetchCount)
@@ -130,7 +131,9 @@ export const router = createTRPCRouter({
       // If we got more than limit results, there are more pages
       const hasMore = results.length > limit
       const paginatedResults = hasMore ? results.slice(0, limit) : results
-      const nextCursor = hasMore ? paginatedResults[paginatedResults.length - 1]?.id : undefined
+      const nextCursor = hasMore
+        ? paginatedResults[paginatedResults.length - 1]?.id
+        : undefined
 
       return {
         orders: paginatedResults,
