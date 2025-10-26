@@ -139,6 +139,9 @@ export function OrdersTable() {
             <thead>
               <tr className="border-border border-b">
                 <th className="text-muted-foreground px-4 py-3 text-left text-xs font-semibold tracking-wide uppercase">
+                  Date & Time
+                </th>
+                <th className="text-muted-foreground px-4 py-3 text-left text-xs font-semibold tracking-wide uppercase">
                   Side
                 </th>
                 <th className="text-muted-foreground px-4 py-3 text-left text-xs font-semibold tracking-wide uppercase">
@@ -164,6 +167,25 @@ export function OrdersTable() {
                   key={order.id}
                   className="hover:bg-muted/50 transition-colors"
                 >
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <div className="font-mono text-sm">
+                      <div className="text-foreground">
+                        {new Intl.DateTimeFormat('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                        }).format(new Date(order.createdAt))}
+                      </div>
+                      <div className="text-muted-foreground text-xs">
+                        {new Intl.DateTimeFormat('en-US', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                          hour12: true,
+                        }).format(new Date(order.createdAt))}
+                      </div>
+                    </div>
+                  </td>
                   <td className="px-4 py-4 whitespace-nowrap">
                     <Badge
                       className={
