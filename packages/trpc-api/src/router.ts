@@ -2,7 +2,7 @@ import { createTRPCRouter, createProcedure } from './trpc.js'
 import { z } from 'zod/v4'
 import { users, orders } from '@itoam/database/schema'
 import { createSelectSchema } from 'drizzle-zod'
-import { eq, desc, lt } from 'drizzle-orm'
+import { eq, desc, lt, and } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import { calculateMargin, calculateLiquidationPrice } from '@itoam/shared'
 
@@ -79,6 +79,7 @@ export const router = createTRPCRouter({
       z.object({
         limit: z.number().int().min(1).max(100).default(20),
         cursor: z.string().nullish(),
+        side: z.enum(['b', 's']).optional(),
       })
     )
     .output(
@@ -106,19 +107,25 @@ export const router = createTRPCRouter({
         }
       }
 
-      // Build query - handle with or without cursor
-      const results = cursorCreatedAt
-        ? await ctx.db
+      // Build conditions - filter by cursor and optionally by side
+      const whereConditions: unknown[] = []
+      if (cursorCreatedAt) {
+        whereConditions.push(lt(orders.createdAt, cursorCreatedAt))
+      }
+      if (input.side) {
+        whereConditions.push(eq(orders.side, input.side))
+      }
+
+      // Build query - fetch orders with optional filtering
+      const results = await (whereConditions.length > 0
+        ? ctx.db
             .select()
             .from(orders)
-            .where(lt(orders.createdAt, cursorCreatedAt))
-            .orderBy(desc(orders.createdAt))
-            .limit(fetchCount)
-        : await ctx.db
-            .select()
-            .from(orders)
-            .orderBy(desc(orders.createdAt))
-            .limit(fetchCount)
+            .where(and(...(whereConditions as Parameters<typeof and>)))
+        : ctx.db.select().from(orders)
+      )
+        .orderBy(desc(orders.createdAt))
+        .limit(fetchCount)
 
       // If we got more than limit results, there are more pages
       const hasMore = results.length > limit

@@ -6,7 +6,11 @@ import { NumericFormat } from 'react-number-format'
 import { satsToBtc } from '@itoam/shared'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { BarChart3, Loader2 } from 'lucide-react'
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from '@/components/ui/toggle-group'
+import { BarChart3, Loader2, TrendingUp, TrendingDown } from 'lucide-react'
 import type { ApiRouter } from '@itoam/trpc-api'
 import superJSON from 'superjson'
 
@@ -22,6 +26,7 @@ const trpcClient = createTRPCClient<ApiRouter>({
 
 export function OrdersTable() {
   const { ref: loadMoreRef, inView } = useInView()
+  const [sideFilter, setSideFilter] = React.useState<'all' | 'b' | 's'>('all')
 
   const {
     data,
@@ -32,11 +37,12 @@ export function OrdersTable() {
     isPending,
     isError,
   } = useInfiniteQuery({
-    queryKey: ['orders'],
+    queryKey: ['orders', sideFilter],
     queryFn: async ({ pageParam }) =>
       trpcClient.getOrders.query({
         limit: 20,
         cursor: pageParam as string | undefined,
+        side: sideFilter === 'all' ? undefined : sideFilter,
       }),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? null,
@@ -80,7 +86,43 @@ export function OrdersTable() {
 
   return (
     <Card className="bg-card border-0 p-6">
-      <h2 className="text-foreground mb-2 text-2xl font-bold">Order History</h2>
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-foreground text-2xl font-bold">Order History</h2>
+        <ToggleGroup
+          type="single"
+          value={sideFilter}
+          onValueChange={(value) => {
+            if (value) {
+              setSideFilter(value as 'all' | 'b' | 's')
+            }
+          }}
+          className="bg-muted/50 rounded-md p-1"
+        >
+          <ToggleGroupItem
+            value="all"
+            aria-label="All Orders"
+            className="data-[state=on]:bg-muted data-[state=on]:text-foreground"
+          >
+            All Orders
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="b"
+            aria-label="Long Orders"
+            className="data-[state=on]:bg-emerald-500/20 data-[state=on]:text-emerald-300"
+          >
+            <TrendingUp className="h-4 w-4 mr-1.5" />
+            Long
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="s"
+            aria-label="Short Orders"
+            className="data-[state=on]:bg-rose-500/20 data-[state=on]:text-rose-300"
+          >
+            <TrendingDown className="h-4 w-4 mr-1.5" />
+            Short
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
 
       {allOrders.length === 0 ? (
         <div className="border-border bg-muted/30 flex flex-col items-center justify-center rounded-lg border py-12">
