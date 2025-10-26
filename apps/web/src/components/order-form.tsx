@@ -134,9 +134,6 @@ export function OrderForm() {
       <h2 className="text-foreground mb-2 text-2xl font-bold">
         Trade Parameters
       </h2>
-      <p className="text-muted-foreground mb-6 text-sm">
-        Configure your position details
-      </p>
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Side Selector */}

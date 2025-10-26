@@ -1,20 +1,60 @@
-import { useQuery } from '@tanstack/react-query'
+import React from 'react'
+import { useInfiniteQuery } from '@tanstack/react-query'
+import { useInView } from 'react-intersection-observer'
+import { createTRPCClient, httpLink } from '@trpc/client'
 import { NumericFormat } from 'react-number-format'
-import { trpc } from '@/utils'
 import { satsToBtc } from '@itoam/shared'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { BarChart3 } from 'lucide-react'
+import { BarChart3, Loader2 } from 'lucide-react'
+import type { ApiRouter } from '@itoam/trpc-api'
+import superJSON from 'superjson'
+
+// Create a tRPC client for fetching (reusable across renders)
+const trpcClient = createTRPCClient<ApiRouter>({
+  links: [
+    httpLink({
+      url: `http://localhost:3000/trpc`,
+      transformer: superJSON,
+    }),
+  ],
+})
 
 export function OrdersTable() {
-  const { data: ordersData, isLoading } = useQuery({
-    ...trpc.getOrders.queryOptions(),
-    refetchInterval: 5000,
+  const { ref: loadMoreRef, inView } = useInView()
+
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isPending,
+    isError,
+  } = useInfiniteQuery({
+    queryKey: ['orders'],
+    queryFn: async ({ pageParam }) =>
+      trpcClient.getOrders.query({
+        limit: 20,
+        cursor: pageParam as string | undefined,
+      }),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? null,
   })
 
-  const orders = ordersData ?? []
+  // Auto-fetch next page when user scrolls to bottom
+  React.useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage()
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
 
-  if (isLoading) {
+  // Flatten all orders from all pages
+  const allOrders = React.useMemo(() => {
+    return data?.pages.flatMap((page) => page.orders) ?? []
+  }, [data])
+
+  if (isPending) {
     return (
       <Card className="bg-card border-0 p-6">
         <h2 className="text-foreground mb-4 text-2xl font-bold">
@@ -25,14 +65,24 @@ export function OrdersTable() {
     )
   }
 
+  if (isError) {
+    return (
+      <Card className="bg-card border-0 p-6">
+        <h2 className="text-foreground mb-4 text-2xl font-bold">
+          Order History
+        </h2>
+        <p className="text-destructive text-center">
+          Error loading orders: {error.message || 'Unknown error'}
+        </p>
+      </Card>
+    )
+  }
+
   return (
     <Card className="bg-card border-0 p-6">
       <h2 className="text-foreground mb-2 text-2xl font-bold">Order History</h2>
-      <p className="text-muted-foreground mb-6 text-sm">
-        Track all submitted positions
-      </p>
 
-      {orders.length === 0 ? (
+      {allOrders.length === 0 ? (
         <div className="border-border bg-muted/30 flex flex-col items-center justify-center rounded-lg border py-12">
           <BarChart3 className="text-muted-foreground mb-3 h-8 w-8" />
           <p className="text-muted-foreground text-center">No orders yet</p>
@@ -67,7 +117,7 @@ export function OrdersTable() {
               </tr>
             </thead>
             <tbody className="divide-border divide-y">
-              {orders.map((order) => (
+              {allOrders.map((order) => (
                 <tr
                   key={order.id}
                   className="hover:bg-muted/50 transition-colors"
@@ -135,6 +185,22 @@ export function OrdersTable() {
               ))}
             </tbody>
           </table>
+
+          {/* Load more sentinel */}
+          <div
+            ref={loadMoreRef}
+            className="flex items-center justify-center py-6"
+          >
+            {isFetchingNextPage && (
+              <div className="flex items-center gap-2">
+                <Loader2 className="text-muted-foreground h-4 w-4 animate-spin" />
+                <p className="text-muted-foreground text-sm">Loading more...</p>
+              </div>
+            )}
+            {!hasNextPage && allOrders.length > 0 && (
+              <p className="text-muted-foreground text-sm">No more orders</p>
+            )}
+          </div>
         </div>
       )}
     </Card>

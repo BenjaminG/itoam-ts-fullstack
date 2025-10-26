@@ -2,7 +2,7 @@ import { createTRPCRouter, createProcedure } from './trpc.js'
 import { z } from 'zod/v4'
 import { users, orders } from '@itoam/database/schema'
 import { createSelectSchema } from 'drizzle-zod'
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, lt } from 'drizzle-orm'
 import { TRPCError } from '@trpc/server'
 import { calculateMargin, calculateLiquidationPrice } from '@itoam/shared'
 
@@ -75,9 +75,60 @@ export const router = createTRPCRouter({
       return user
     }),
   getOrders: procedure
-    .output(z.array(ordersSelectSchema))
-    .query(async ({ ctx }) => {
-      return ctx.db.select().from(orders).orderBy(desc(orders.createdAt))
+    .input(
+      z.object({
+        limit: z.number().int().min(1).max(100).default(20),
+        cursor: z.string().nullish(),
+      })
+    )
+    .output(
+      z.object({
+        orders: z.array(ordersSelectSchema),
+        nextCursor: z.string().nullish(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const limit = input.limit
+      // Fetch limit + 1 to determine if there are more pages
+      const fetchCount = limit + 1
+
+      let cursorCreatedAt: Date | undefined
+
+      // If cursor provided, fetch the cursor order to get its createdAt
+      if (input.cursor) {
+        const [cursorOrder] = await ctx.db
+          .select({ createdAt: orders.createdAt })
+          .from(orders)
+          .where(eq(orders.id, input.cursor))
+
+        if (cursorOrder) {
+          cursorCreatedAt = cursorOrder.createdAt
+        }
+      }
+
+      // Build query - handle with or without cursor
+      const results = cursorCreatedAt
+        ? await ctx.db
+            .select()
+            .from(orders)
+            .where(lt(orders.createdAt, cursorCreatedAt))
+            .orderBy(desc(orders.createdAt))
+            .limit(fetchCount)
+        : await ctx.db
+            .select()
+            .from(orders)
+            .orderBy(desc(orders.createdAt))
+            .limit(fetchCount)
+
+      // If we got more than limit results, there are more pages
+      const hasMore = results.length > limit
+      const paginatedResults = hasMore ? results.slice(0, limit) : results
+      const nextCursor = hasMore ? paginatedResults[paginatedResults.length - 1]?.id : undefined
+
+      return {
+        orders: paginatedResults,
+        nextCursor,
+      }
     }),
   createOrder: procedure
     .input(

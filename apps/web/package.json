@@ -27,6 +27,7 @@
     "lucide-react": "0.548.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "react-intersection-observer": "9.16.0",
     "react-number-format": "5.4.4",
     "superjson": "2.2.3",
     "tailwind-merge": "3.3.1",
