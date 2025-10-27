@@ -25,7 +25,9 @@ export function OrderForm() {
   const createOrderMutation = useMutation(
     trpc.orders.create.mutationOptions({
       onSuccess: async () => {
-        await queryClient.invalidateQueries(trpc.orders.list.queryFilter())
+        await queryClient.invalidateQueries(
+          trpc.orders.list.infiniteQueryFilter()
+        )
         // Reset form
         setFormData({
           side: 'b',

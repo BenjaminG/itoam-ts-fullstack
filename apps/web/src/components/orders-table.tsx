@@ -1,25 +1,13 @@
 import React from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useInView } from 'react-intersection-observer'
-import { createTRPCClient, httpLink } from '@trpc/client'
 import { NumericFormat } from 'react-number-format'
 import { satsToBtc } from '@itoam/shared'
+import { trpc } from '@/utils'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { BarChart3, Loader2, TrendingUp, TrendingDown } from 'lucide-react'
-import type { ApiRouter } from '@itoam/trpc-api'
-import superJSON from 'superjson'
-
-// Create a tRPC client for fetching (reusable across renders)
-const trpcClient = createTRPCClient<ApiRouter>({
-  links: [
-    httpLink({
-      url: `http://localhost:3000/trpc`,
-      transformer: superJSON,
-    }),
-  ],
-})
 
 export function OrdersTable() {
   const { ref: loadMoreRef, inView } = useInView()
@@ -33,17 +21,17 @@ export function OrdersTable() {
     isFetchingNextPage,
     isPending,
     isError,
-  } = useInfiniteQuery({
-    queryKey: ['orders', sideFilter],
-    queryFn: async ({ pageParam }) =>
-      trpcClient.orders.list.query({
+  } = useInfiniteQuery(
+    trpc.orders.list.infiniteQueryOptions(
+      {
         limit: 20,
-        cursor: pageParam as string | undefined,
         side: sideFilter === 'all' ? undefined : sideFilter,
-      }),
-    initialPageParam: null as string | null,
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? null,
-  })
+      },
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      }
+    )
+  )
 
   // Auto-fetch next page when user scrolls to bottom
   React.useEffect(() => {
@@ -131,7 +119,7 @@ export function OrdersTable() {
           </p>
         </div>
       ) : (
-        <div className="relative min-h-0 flex-1 overflow-y-auto">
+        <div className="relative min-h-0 flex-1 overflow-x-auto overflow-y-auto">
           <table className="w-full">
             <thead className="bg-card sticky top-0 z-10">
               <tr className="border-border border-b">
@@ -164,7 +152,7 @@ export function OrdersTable() {
                   key={order.id}
                   className="hover:bg-muted/50 transition-colors"
                 >
-                  <td className="px-4 py-4 whitespace-nowrap">
+                  <td className="px-4 py-4">
                     <div className="font-mono text-sm">
                       <div className="text-foreground">
                         {new Intl.DateTimeFormat('en-US', {
